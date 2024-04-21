@@ -6,7 +6,6 @@ import mne
 import pickle
 from epoch_funcs import epoch_loc_and_motion, create_synthetic
 from decoding_funcs import LDA_map, LDA_map_synth
-from joblib import Parallel, delayed
 
 dataFolder = 'data/preprocessed_fifs/' 
 mne.set_log_level(verbose=False) # simplify HPC output
@@ -20,10 +19,11 @@ def save_data(file, scores):
         pickle.dump(scores, f)
         
 def run_decoding(x, file):
-    pID = file[:-17]
+    
+    pID = file[:-4]
     raw = load_data(file)
 
-    xTrain, yTrain, xTest, yTest = epoch_loc_and_motion(raw, pID, -0.2, 0.5)   
+    xTrain, yTrain, xTest, yTest = epoch_loc_and_motion(raw, pID)   
     scores = LDA_map(xTrain, yTrain, xTest, yTest)
     save_data('data/LDA/' + pID + '_LDA.pickle', scores)
     
@@ -33,11 +33,12 @@ def run_decoding(x, file):
     save_data('data/LDA/' + pID + '_synth.pickle', scores)
     
 def main():
-    files = [f for f in os.listdir(dataFolder) if f.endswith('preprocessed.fif')] # get list of .fif files 
+    
+    files = [f for f in os.listdir(dataFolder) if not '-' in f] # get list of .fif files 
     files.sort() 
     print(files,flush=True)
     
-    Parallel(n_jobs=1)(delayed(run_decoding)(x, file) for x, file in enumerate(files))
-    
-if __name__ == "__main__":
-    main()
+    for x, file in enumerate(files):
+        run_decoding(x, file)
+                
+main()

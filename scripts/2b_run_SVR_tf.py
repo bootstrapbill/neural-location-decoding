@@ -4,7 +4,6 @@
 import mne         
 import os 
 import pickle
-from joblib import Parallel, delayed
 from decoding_funcs import decode_diag_tf
 from epoch_funcs import epoch_localizers, epoch_tf
 
@@ -25,8 +24,10 @@ def run_diag_tf(data, yTrain, pID):
     save_data('data/tf/' + pID + '_tf.pickle', diagScoresTF)
     
 def decode(x, file):
-    pID = file[:-17] # get participant ID and session number
+    
+    pID = file[:-4] # get ID and session number
     raw = load_data(file)
+    
     data, yTrain = epoch_localizers(raw, pID, -1.2, 1.5)
     del raw    
     
@@ -35,11 +36,12 @@ def decode(x, file):
 
 def main():
     
-    files = [f for f in os.listdir(dataFolder) if f.endswith('preprocessed.fif')] # get list of .fif files 
+    files = [f for f in os.listdir(dataFolder) if not '-' in f] # get list of .fif files 
     files.sort() 
-    print(files,flush=True) # sanity check printout 
-    
-    Parallel(n_jobs=1)(delayed(decode)(x, file) for x, file in enumerate(files))
-        
-if __name__ == "__main__":
-    main()
+    files = files[26:]
+    print(files,flush=True)
+
+    for x, file in enumerate(files):
+        decode(x, file)
+                    
+main()
