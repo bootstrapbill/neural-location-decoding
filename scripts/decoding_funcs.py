@@ -40,7 +40,9 @@ def invAngError(y_pred, y):
     mdiff = np.mean(np.abs(diff)) # take avg absolute difference 
     accuracy = (np.pi/2) - mdiff # centre on zero, range is [+pi to -pi]
     
-    return accuracy/np.pi # rescale between -1 and 1 
+    return accuracy/np.pi # WARNING: this scores ranges between -0.5 and 0.5,
+                          # to rescale between -1 and 1, multiply by 2. 
+                          # see plot_SVR.py.
     
 def errorPos(y_pred, y): 
     """ Calculate inverse angular error at each possible position.
@@ -57,7 +59,7 @@ def errorPos(y_pred, y):
     df = pd.DataFrame({'error': (np.pi/2)-np.abs(diff),'position': y}) # centre on zero
     accuracy_by_pos = df.groupby('position').mean().to_numpy() # take average
 
-    return accuracy_by_pos/np.pi # rescale between -1 and 1 
+    return accuracy_by_pos/np.pi # WARNING: see note above! range is [-0.5, 0.5]
 
 class CircRegression(BaseEstimator): 
     """SVR function with circular dependent variable. 

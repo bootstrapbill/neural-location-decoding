@@ -32,6 +32,16 @@ search = load_data(pIDs, 'search')
 tf = load_data(pIDs, 'tf')
 stacked = load_data(pIDs, 'stacked')
 
+# Rescale scores to range [-1, 1]
+# Note, this fixes an issue with the calculation of the 
+# decoding scores which were accidentally scaled between -0.5 and 0.5
+# rather than -1 and 1 as originally intended. See decoding_funcs.py
+diag = 2 * (diag)
+pos = 2 * (pos)
+tgm = 2 * (tgm)
+search = 2 * (search) 
+tf = 2 * (tf)
+stacked = 2 * (stacked) 
 
 #### FIGURE 1 ####
 
@@ -54,10 +64,10 @@ time = np.linspace(-200, 1000, 615)
 
 ax[0].fill_between(time, accuracy - se, accuracy + se, alpha=0.5, color="grey")
 ax[0].plot(time, accuracy, color="black")
-ax[0].scatter(time, -0.005*np.ones_like(time), c="black", alpha=sig_marker)
+ax[0].scatter(time, -0.01*np.ones_like(time), c="black", alpha=sig_marker)
 ax[0].set_xlim((-200, 1000))
-ax[0].set_ylim((-0.01, 0.05))
-ax[0].set_yticks(ticks=[0, 0.025, 0.05], labels=['0', '0.025', '0.05'])
+ax[0].set_ylim((-0.02, 0.1))
+ax[0].set_yticks(ticks=[0, 0.05, 0.1], labels=['0', '0.05', '0.1'])
 ax[0].set_xticks(ticks=[0, 400, 800], labels=['0', '400', '800'])
 ax[0].hlines(0, -200, 1000, colors="black")
 ax[0].spines[['right', 'top']].set_visible(False)
@@ -77,11 +87,11 @@ accuracy = np.append(accuracy, accuracy[0]) # same as above
 
 ax[1].fill_between(np.deg2rad(angles), accuracy - se, accuracy + se, alpha=0.5, color="grey")
 ax[1].plot(np.deg2rad(angles), accuracy, color="black")
-ax[1].set_yticks(ticks=[0, 0.025, 0.05], labels=['', '', ''])
+ax[1].set_yticks(ticks=[0, 0.05, 0.1], labels=['', '', ''])
 ax[1].set_xticks(ticks=[0, np.pi/4, np.pi/2, (3/4)*np.pi, 
                         np.pi, (5/4) * np.pi, (3/2) * np.pi, (7/4) * np.pi], 
                  labels=['', '', '', '', '', '', '', ''])
-ax[1].set_ylim((0, 0.06))
+ax[1].set_ylim((0, 0.12))
 
 rect = ax[1].get_position()
 rect = (rect.xmin-0.035, rect.ymin+rect.height/2 + 0.055, # x, y
@@ -98,7 +108,7 @@ scale_ax.set_ylim(ax[1].get_rorigin(), ax[1].get_rmax())
 scale_ax.set_ylabel('Decoding Score', fontsize = 16, fontweight = 'bold')
 
 #### plot TGM
-scaler = 0.025
+scaler = 0.05
 
 corrected_pvals = cluster_correct(tgm)
 sig_marker = corrected_pvals<alpha

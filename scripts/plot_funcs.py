@@ -222,3 +222,17 @@ def cluster_correct(X):
         p_values_[cluster.T] = pval
         
     return np.squeeze(p_values_)
+
+def one_sided_ttest(data):
+
+    times, positions, _ = data.shape
+    p_values = np.zeros((times, positions)) 
+
+    for t in range(times):
+        for p in range(positions):
+
+            _, p_vals = scipy.stats.ttest_1samp(data[t, p, :], 0, alternative = 'greater')
+
+            p_values[t, p] = p_vals
+
+    return p_values
